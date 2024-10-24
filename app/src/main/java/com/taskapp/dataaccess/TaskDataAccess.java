@@ -1,5 +1,11 @@
 package com.taskapp.dataaccess;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.*;
+import com.taskapp.model.*;
+
 public class TaskDataAccess {
 
     private final String filePath;
@@ -27,14 +33,41 @@ public class TaskDataAccess {
      * @see com.taskapp.dataaccess.UserDataAccess#findByCode(int)
      * @return タスクのリスト
      */
-    // public List<Task> findAll() {
-    //     try () {
-
-    //     } catch (IOException e) {
-    //         e.printStackTrace();
-    //     }
-    //     return null;
-    // }
+    public List<Task> findAll() {
+        List<Task> tasks = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+    
+            reader.readLine();
+            while ((line = reader.readLine()) != null) {
+                String[] values = line.split(",");
+    
+                // CSVの形式チェック
+                if (values.length != 4) {
+                    continue;
+                }
+    
+                int code = Integer.parseInt(values[0]);
+                String name = values[1];
+                int status = Integer.parseInt(values[2]);
+                int repUserCode = Integer.parseInt(values[3]);
+    
+                // Userオブジェクトの見つかったユーザーとマッチするか検索
+                User repUser = userDataAccess.findByCode(repUserCode);
+                if (repUser == null) {
+                    continue; // マッチしない場合はスキップ
+                }
+    
+                // マッピング
+                Task task = new Task(code, name, status, repUser);
+                // タスクを追加
+                tasks.add(task);
+            }
+        } catch (IOException e) {
+        e.printStackTrace();
+        }
+        return tasks;
+    }
 
     /**
      * タスクをCSVに保存します。
