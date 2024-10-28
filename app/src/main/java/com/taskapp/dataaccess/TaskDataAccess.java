@@ -95,25 +95,27 @@ public class TaskDataAccess {
         
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
-        
-        reader.readLine();
-        while ((line = reader.readLine()) != null) {
-            String[] values = line.split(",");
-            if (values.length != 4) {
-                continue;
+            reader.readLine(); // ヘッダー行をスキップ
+            while ((line = reader.readLine()) != null) {
+                String[] values = line.split(",");
+                if (values.length != 4) {
+                    continue; // 正しい形式かチェック
+                }
+    
+                int taskCode = Integer.parseInt(values[0]);
+                String name = values[1];
+                int status = Integer.parseInt(values[2]);
+                int repUserCode = Integer.parseInt(values[3]);
+    
+                if (taskCode == code) {
+                    User repUser = userDataAccess.findByCode(repUserCode);
+                    return new Task(taskCode, name, status, repUser);
+                }
             }
-
-            int taskCode = Integer.parseInt(values[0]);
-            String name = values[1];
-            int status = Integer.parseInt(values[2]);
-            int repUserCode = Integer.parseInt(values[3]);
-
-            Task task = new Task(taskCode, name, status, repUserCode);
-        }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+        return null; // 見つからない場合はnullを返す
     }
 
     /**
@@ -121,8 +123,17 @@ public class TaskDataAccess {
      * @param updateTask 更新するタスク
      */
     public void update(Task updateTask) {
-        try () {
-
+        List<Task> tasks = findAll(); // すべてのタスクを取得
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            writer.write("Code,Name,Status,RepUserCode\n"); // ヘッダーを書き込む
+            for (Task task : tasks) {
+                if (task.getCode() == updateTask.getCode()) {
+                    // タスクの詳細を更新
+                    task = updateTask;
+                }
+                writer.write(task.getCode() + "," + task.getName() + "," + task.getStatus() + "," + task.getRepUser().getCode());
+                writer.newLine();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -65,6 +65,7 @@ public class TaskUI {
                 switch (selectMenu) {
                     case "1":
                         taskLogic.showAll(loginUser);
+                        selectSubMenu();
                         break;
                     case "2":
                         inputNewInformation();
@@ -176,10 +177,10 @@ public class TaskUI {
                     inputChangeInformation();
                     break;
                 case "2":
-                    displayMenu();
+                    flg = false;
                     break;
                 default:
-                    
+                    System.out.println("無効な選択肢です。再度選択してください。");
                     break;
             }
             flg = false;
@@ -220,7 +221,7 @@ public class TaskUI {
 
             int statusCode = Integer.parseInt(status);
             if (statusCode < 1 || statusCode > 2) {
-                System.out.println("選択肢は1または2で入力してください");
+                System.out.println("ステータスは1・2の中から選択してください");
                 System.out.println();
                 continue;
             }
